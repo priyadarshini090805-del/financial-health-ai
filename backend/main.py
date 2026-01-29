@@ -1,13 +1,26 @@
+import os
+import shutil
+from dotenv import load_dotenv
 from fastapi import FastAPI, UploadFile, File
+from fastapi.middleware.cors import CORSMiddleware
+
 from backend.analysis import (
     load_financials,
     compute_metrics,
     generate_ai_summary,
 )
-import shutil
-import os
+
+load_dotenv()
+
 
 app = FastAPI(title="Financial Health AI")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 DATA_DIR = "uploaded_data"
 os.makedirs(DATA_DIR, exist_ok=True)

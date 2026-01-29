@@ -22,7 +22,7 @@ def compute_metrics(income, expenses, loans):
         operating_profit / total_expenses if total_expenses > 0 else 0.0
     )
 
-    metrics = {
+    return {
         "total_income": round(total_income, 2),
         "total_expenses": round(total_expenses, 2),
         "operating_profit": round(operating_profit, 2),
@@ -32,47 +32,34 @@ def compute_metrics(income, expenses, loans):
         "cash_runway_months": round(cash_runway_months, 2),
     }
 
-    return metrics
-
-
-def generate_llm_prompt(metrics: dict):
-    return f"""
-You are a financial analyst for Indian SMEs.
-
-Analyze the following financial metrics and provide:
-1. Financial health interpretation
-2. Key financial risks
-3. Cost optimization suggestions
-4. Working capital improvement advice
-5. Credit readiness summary
-
-Metrics:
-{metrics}
-
-Respond in simple language suitable for a non-finance business owner.
-"""
-
 
 def generate_ai_summary(metrics: dict):
     score = 100
     risks = []
+    advice = []
 
     if metrics["net_margin"] < 0.1:
         score -= 25
         risks.append("Low profit margin")
+        advice.append("Reduce unnecessary expenses and review pricing.")
 
     if metrics["debt_service_ratio"] > 0.4:
         score -= 25
         risks.append("High debt burden")
+        advice.append("Restructure loans or increase monthly revenue.")
 
     if metrics["cash_runway_months"] < 1:
         score -= 25
         risks.append("Cash flow stress")
+        advice.append("Improve receivables collection and control cash burn.")
 
     score = max(score, 0)
+
+    if not advice:
+        advice.append("Financial health looks stable. Maintain discipline.")
 
     return {
         "health_score": score,
         "risks": risks,
-        "llm_prompt": generate_llm_prompt(metrics),
+        "advice": " ".join(advice)
     }
